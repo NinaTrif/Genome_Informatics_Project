@@ -34,7 +34,7 @@ class Checkpoints(object):
         cp_row = row // self.cp_distance
         num_c = 0
         tmp_row = row
-        if (row % self.cp_distance > self.cp_distance // 2) and (cp_row + 1 <= max(self.checkpoints[c])):
+        if (row % self.cp_distance > self.cp_distance // 2) and (cp_row + 1 < len(self.checkpoints[c])):
             # seek number of occurrences of character "up"
             cp_row += 1
             tmp_row += 1

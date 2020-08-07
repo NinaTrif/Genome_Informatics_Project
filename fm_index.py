@@ -31,7 +31,7 @@ class FM_Index():
         """ Return positions where P is found in T """
         rng = self.range(p)
         if rng is None or rng[1] < rng[0]:
-            return 0
+            return -1
         lower, upper = rng[0], rng[1]
         indices = list()
 
