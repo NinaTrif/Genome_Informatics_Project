@@ -3,7 +3,7 @@ import burrows_wheeler_suffix_array as bw_sa
 import burrows_wheeler_transform as bwt
 
 
-class FM_Index():
+class FM_Index(object):
     """ Class that represents an FM Index """
 
     def __init__(self, t, cp_distance=256, sa_distance=32):
@@ -29,11 +29,11 @@ class FM_Index():
 
     def query(self, p):
         """ Return positions where P is found in T """
+        indices = list()
         rng = self.range(p)
         if rng is None or rng[1] < rng[0]:
-            return -1
+            return indices
         lower, upper = rng[0], rng[1]
-        indices = list()
 
         for i in range(lower, upper):
             row = i
