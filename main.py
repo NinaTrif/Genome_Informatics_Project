@@ -49,7 +49,6 @@ def main():
     print(n_reads)
     for r in reads_to_alignments.keys():
         if len(reads_to_alignments[r]) > 0:
-            print(len(reads_to_alignments[r]))
             n_mapped += 1
     print(n_mapped)
 

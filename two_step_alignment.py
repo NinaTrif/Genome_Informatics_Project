@@ -1,6 +1,7 @@
 import global_alignment as gl_align
 import global_variables as gl_var
 import alignment as al
+import sys
 
 
 def seed_and_extend(reference_sq, read, seed_length, margin, is_reversed=False):
@@ -25,5 +26,5 @@ def align_read_at_position(reference_sq, read, position, seed_length, margin, is
         score, transcript = gl_align.global_alignment(reference_sq[start:end], read)
         alignment = al.Alignment(position, score, transcript, is_reversed)
     else:
-        alignment = al.Alignment(position, 0, '', is_reversed, is_valid=False)
+        alignment = al.Alignment(position, -sys.maxsize - 1, '', is_reversed, is_valid=False)
     return alignment
