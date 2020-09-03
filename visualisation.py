@@ -13,7 +13,7 @@ def plot_scores_scatter(scores, seed, margin, n_mapped):
     plt.xlabel('n')
     plt.ylabel('percentage')
     plt.scatter(data["x"], data["y"], marker='o')
-    plt.savefig('Scores_' + str(seed) + '_' + str(margin), bbox_inches='tight')
+    plt.savefig('results/Scores_' + str(seed) + '_' + str(margin), bbox_inches='tight')
     plt.close()
     pass
 
@@ -30,15 +30,15 @@ def plot_avg_scores(avg_scores):
         bars = ax.bar(x + i * width, mapping_scores, width, label='margin=' + str(m))
         for bar in bars:
             yval = bar.get_height()
-            plt.text(bar.get_x() + bar.get_width() / 2.0, yval + 1, str(yval), ha='center', va='bottom')
-    ax.set_xticks(x, g_var.seed_length)
-    plt.xticks(x, g_var.seed_length)
+            plt.text(bar.get_x() + bar.get_width() / 2.0, yval + 1, str(round(yval,2)), ha='center', va='bottom')
+    ax.set_xticks(x + width / 2, g_var.seed_length)
+    plt.xticks(x + width / 2, g_var.seed_length)
     ax.legend()
 
     plt.title('Average scores')
     plt.xlabel('seed length')
     plt.ylabel('average score')
-    plt.savefig('avg_scores.png', bbox_inches='tight')
+    plt.savefig('results/avg_scores.png', bbox_inches='tight')
     plt.close()
 
 
@@ -54,15 +54,15 @@ def plot_exec_times(exec_times):
         bars = ax.bar(x + i * width, durations, width, label='margin=' + str(m))
         for bar in bars:
             yval = bar.get_height()
-            plt.text(bar.get_x() + bar.get_width() / 2.0, yval + 1, str(yval), ha='center', va='bottom')
-    ax.set_xticks(x, g_var.seed_length)
-    plt.xticks(x, g_var.seed_length)
+            plt.text(bar.get_x() + bar.get_width() / 2.0, yval + 0.2, str(yval), ha='center', va='bottom')
+    ax.set_xticks(x + width / 2, g_var.seed_length)
+    plt.xticks(x + width / 2, g_var.seed_length)
     ax.legend()
 
     plt.title('Execution times')
     plt.xlabel('seed length')
     plt.ylabel('duration')
-    plt.savefig('exec_times.png', bbox_inches='tight')
+    plt.savefig('results/exec_times.png', bbox_inches='tight')
     plt.close()
 
 
@@ -79,5 +79,5 @@ def plot_mapped(num_mapped_seed):
     plt.title('# mapped reads for different seed lengths')
     plt.xlabel('seed length')
     plt.ylabel('number of reads')
-    plt.savefig('num_mapped.png', bbox_inches='tight')
+    plt.savefig('results/num_mapped.png', bbox_inches='tight')
     plt.close()

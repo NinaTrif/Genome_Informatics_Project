@@ -10,7 +10,7 @@ def scoring_matrix(a, b):
     return -3
 
 
-def global_alignment(x, y):
+def global_alignment(x, y, margin):
     D = numpy.zeros((len(x) + 1, len(y) + 1), dtype=int)
 
     for i in range(1, len(x) + 1):
@@ -26,13 +26,21 @@ def global_alignment(x, y):
 
     # function returns table and global alignment score
     # alignment score is in cell (n,m) of the matrix
-    return D[len(x), len(y)], traceback(x, y, D)[1]
+
+    max_v = D[len(x), len(y)]
+    m_ind = len(y)
+    for k in range(len(y) - margin, len(y)):
+        if D[len(x), k] >= max_v:
+            max_v = D[len(x), k]
+            m_ind = k
+
+    return max_v, traceback(x, y, D, m_ind)[1]
 
 
-def traceback(x, y, V):
+def traceback(x, y, V, j):
     # initializing starting position cell(n,m)
     i = len(x)
-    j = len(y)
+    # j = len(y)
 
     # initializing strings we use to represent alignments in x, y, edit transcript and global alignment
     ax, ay, am, tr = '', '', '', ''

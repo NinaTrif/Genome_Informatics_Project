@@ -10,7 +10,7 @@ class FM_Index(object):
         if t[-1] != '$':
             t += '$'
 
-        sa = bw_sa.suffix_array(t)
+        sa = bw_sa.suffix_array_ManberMyers(t)
         self.bwt = bw_sa.bwt_via_sa(t)
         self.sample_sa = self.downsample_suffix_array(sa, sa_distance)
         self.cp_distance = cp_distance

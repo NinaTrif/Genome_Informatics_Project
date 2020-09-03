@@ -5,8 +5,23 @@ import global_variables as g_var
 import fm_index as fmi
 from timeit import default_timer as timer
 import visualisation as visual
+import os
+import sys
 
 util.parse_command_line_arguments()
+
+try:
+    path = os.path.dirname(sys.argv[0]) + '/results'
+    if not os.path.exists(path):
+        os.mkdir(path)
+except OSError:
+    raise Exception('Error opening results file.' + '\n' + "Creation of the directory %s failed" % path)
+
+try:
+    res_file = open('results/results.txt', 'w')
+except Exception as ex:
+    raise Exception('Error opening results file.' + '\n' + str(ex))
+res_file.write('ALIGNMENT SCORES DISTRIBUTION:\n')
 
 # process fasta file
 try:
@@ -27,13 +42,13 @@ for ref in fasta_sequences:
 
 # process fastq file
 try:
-    fastq_file = open(g_var.fastq_file_path)
-    fastq_sequences = SeqIO.parse(fastq_file, 'fastq')
+    # fastq_file = open(g_var.fastq_file_path)
+    fastq_sequences = SeqIO.index(g_var.fastq_file_path, 'fastq')
 except Exception as ex:
     raise Exception('Error processing fastq file.' + '\n' + str(ex))
-reads = dict()
-for read in fastq_sequences:
-    reads[read.id] = str(read.seq)
+# reads = dict()
+# for read in fastq_sequences:
+#     reads[read.id] = str(read.seq)
 
 exec_times = dict()  # key = margin, value = list of tuples(seed_length, exec_time)
 avg_scores = dict()
@@ -51,25 +66,48 @@ for i in g_var.seed_length:
         start_time = timer()
 
         # process reads
-        for read_id in reads.keys():
-            read = reads[read_id]
-            reads_to_alignments[read_id] = tsa.seed_and_extend(reference_seq, read, i, j)
-            reversed_read = read[::-1]
-            reads_to_alignments[read_id] += tsa.seed_and_extend(reference_seq, reversed_read, i, j, is_reversed=True)
+        # for read_id in reads.keys():
+        #     read = reads[read_id]
+        #     reads_to_alignments[read_id] = tsa.seed_and_extend(reference_seq, read, i, j)
+        #     reversed_read = read[::-1]
+        #     reads_to_alignments[read_id] += tsa.seed_and_extend(reference_seq, reversed_read, i, j, is_reversed=True)
 
-        # calculate average mapping score
         avg_mapping = 0
         n_mapped = 0
-        for rd in reads_to_alignments.keys():
-            if len(reads_to_alignments[rd]) > 0:
+        n_forward = 0
+        n_reverse = 0
+        for r in list(fastq_sequences.keys()):
+            read = str(fastq_sequences[r].seq)
+            reads_to_alignments[r] = tsa.seed_and_extend(reference_seq, read, i, j)
+            reversed_read = list(read[::-1])
+            for chr in range(len(reversed_read)):
+                if reversed_read[chr] == 'G':
+                    reversed_read[chr] = 'C'
+                elif reversed_read[chr] == 'T':
+                    reversed_read[chr] = 'A'
+                elif reversed_read[chr] == 'A':
+                    reversed_read[chr] = 'T'
+                elif reversed_read[chr] == 'C':
+                    reversed_read[chr] = 'G'
+            reversed_read = ''.join([str(elem) for elem in reversed_read])
+            tmp = tsa.seed_and_extend(reference_seq, reversed_read, i, j, is_reversed=True)
+            reads_to_alignments[r] += tmp
+            reads_to_alignments[r].sort(key=lambda read: read.alignment_score, reverse=True)
+            if len(reads_to_alignments[r]) > 0:
                 n_mapped += 1
-                s = reads_to_alignments[rd][0].alignment_score
-                if reads_to_alignments[rd][0].is_valid is True:
+                if reads_to_alignments[r][0].is_reversed is True:
+                    n_reverse += 1
+                else:
+                    n_forward += 1
+                s = reads_to_alignments[r][0].alignment_score
+                if reads_to_alignments[r][0].is_valid is True:
                     avg_mapping += s
                     if s not in scores:
                         scores[s] = 1
                     else:
                         scores[s] += 1
+
+        # calculate average mapping score
         # avg_scores[(i, j)] = avg_mapping / n_mapped
         avg_scores[j] += [(i, avg_mapping / n_mapped)]
         num_mapped[(i, j)] = n_mapped
@@ -77,10 +115,20 @@ for i in g_var.seed_length:
 
         # end time
         end_time = timer()
-        exec_times[j] += [(i, int(end_time - start_time))]
+        exec_times[j] += [(i, int((end_time - start_time) / 60))]
 
         # plot independent plots
         visual.plot_scores_scatter(scores, i, j, n_mapped)
+        # print(n_forward)
+        # print(n_reverse)
+        res_file.write('SEED=' + str(i) + '/MARGIN=' + str(j) + '\n')
+        res_file.write('# mapped reads: ' + str(n_mapped) + '\n')
+        res_file.write('# forward: ' + str(n_forward) + '\n')
+        res_file.write('# reverse: ' + str(n_reverse) + '\n')
+        scores = sorted([(k, v) for k, v in scores.items()], key=lambda x: x[0], reverse=True)
+        for score in scores:
+            res_file.write(str(score[0]) + ': ' + str(score[1]) + '\n')
+        res_file.write('\n\n')
 
 # plot dependent plots
 visual.plot_avg_scores(avg_scores)
