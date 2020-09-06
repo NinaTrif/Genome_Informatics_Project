@@ -11,6 +11,7 @@ Implementirati na programskom jeziku Python:
 6. Pripremiti video prezentaciju projekta (3 - 5 minuta trajanja) koja će biti dostupna na YouTube ili drugom on-line video servisu (10 poena).
 
 Pokretanje programa:
+
 Pokrenuti program.py i proslediti neophodne parametre:
 
 	-a: putanja do FASTA fajla
