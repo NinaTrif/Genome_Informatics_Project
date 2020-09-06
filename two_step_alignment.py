@@ -23,8 +23,8 @@ def align_read_at_position(reference_sq, read, position, seed_length, margin, is
     end = start + len(read) + margin
     if len(reference_sq) >= end:
         # score, transcript = gl_align.global_alignment(reference_sq[start:end], read)
-        score, transcript = gl_align.global_alignment(read, reference_sq[start:end], margin)
-        alignment = al.Alignment(position, score, transcript, is_reversed)
+        score, transcript, true_margin = gl_align.global_alignment(read, reference_sq[start:end], margin)
+        alignment = al.Alignment(position, reference_sq[position:end-margin+true_margin], score, transcript, is_reversed)
     else:
         # alignment = al.Alignment(position, -sys.maxsize - 1, '', is_reversed, is_valid=False)
         pass

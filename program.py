@@ -15,7 +15,7 @@ try:
     if not os.path.exists(path):
         os.mkdir(path)
 except OSError:
-    raise Exception('Error opening results file.' + '\n' + "Creation of the directory %s failed" % path)
+    raise Exception("Creation of directory %s failed" % path)
 
 try:
     res_file = open('results/results.txt', 'w')
@@ -76,6 +76,15 @@ for i in g_var.seed_length:
         n_mapped = 0
         n_forward = 0
         n_reverse = 0
+
+        # create alignment file for this seed/margin pair
+        try:
+            alignment_file = open('results/alignments_best_' + str(i) + '_' + str(j) + '.txt', 'w')
+        except Exception as ex:
+            raise Exception('Error opening alignment file.' + '\n' + str(ex))
+        alignment_file.write('READ_ID\tREAD_SEQ\tPOS\tREF_SEQ\tSCORE\tEDIT_TRANSCRIPT\tFORWARD\n')
+
+        # iterate over all reads
         for r in list(fastq_sequences.keys()):
             read = str(fastq_sequences[r].seq)
             reads_to_alignments[r] = tsa.seed_and_extend(reference_seq, read, i, j)
@@ -107,6 +116,21 @@ for i in g_var.seed_length:
                     else:
                         scores[s] += 1
 
+                    # write best alignment score for current alignment
+                    alignment_file.write(r + '\t' + str(fastq_sequences[r].seq) + '\t' + str(
+                        reads_to_alignments[r][0].position) + '\t' + reads_to_alignments[r][0].ref_seq + '\t' + str(
+                        reads_to_alignments[r][0].alignment_score) + '\t' + reads_to_alignments[r][0].edit_transcript + '\t' + str(
+                        not reads_to_alignments[r][0].is_reversed) + '\n')
+
+            # write all alignments for current read to file, sorted by descending alignment score
+            # for alignment in reads_to_alignments[r]:
+            #     alignment_file.write(r + '\t' + str(fastq_sequences[r].seq) + '\t' + str(
+            #         alignment.position) + '\t' + alignment.ref_seq + '\t' + str(
+            #         alignment.alignment_score) + '\t' + alignment.edit_transcript + '\t' + str(
+            #         not alignment.is_reversed) + '\n')
+
+        alignment_file.close()
+
         # calculate average mapping score
         # avg_scores[(i, j)] = avg_mapping / n_mapped
         avg_scores[j] += [(i, avg_mapping / n_mapped)]
@@ -119,8 +143,6 @@ for i in g_var.seed_length:
 
         # plot independent plots
         visual.plot_scores_scatter(scores, i, j, n_mapped)
-        # print(n_forward)
-        # print(n_reverse)
         res_file.write('SEED=' + str(i) + '/MARGIN=' + str(j) + '\n')
         res_file.write('# mapped reads: ' + str(n_mapped) + '\n')
         res_file.write('# forward: ' + str(n_forward) + '\n')
@@ -134,3 +156,5 @@ for i in g_var.seed_length:
 visual.plot_avg_scores(avg_scores)
 visual.plot_exec_times(exec_times)
 visual.plot_mapped(num_mapped_seed)
+
+res_file.close()

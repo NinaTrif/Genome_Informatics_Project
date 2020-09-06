@@ -34,7 +34,7 @@ def global_alignment(x, y, margin):
             max_v = D[len(x), k]
             m_ind = k
 
-    return max_v, traceback(x, y, D, m_ind)[1]
+    return max_v, traceback(x, y, D, m_ind)[1], (m_ind - len(x))
 
 
 def traceback(x, y, V, j):
